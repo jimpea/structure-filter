@@ -17,8 +17,8 @@ a final good list.
 Pre-Requisites
 --------------
 
-- Python 2.7
-- Pybel
+- Python 2.7.3
+- sudo apt-get install python-openbabel
 
 Tests
 -----

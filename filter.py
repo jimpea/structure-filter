@@ -46,3 +46,10 @@ class FilterChain:
     
 
     return outputs  
+
+class CompoundFilter:
+
+  def __init__(self, name, smarts):
+    self.smarts = smarts
+    self.name = name
+

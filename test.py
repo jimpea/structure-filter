@@ -58,9 +58,9 @@ class EvenFilterTest(unittest.TestCase):
     self.assertEqual(expect, fChain.process(in_list))
 
   def test_CompoundFilter(self):
-    fname = "phosphate-filter"
+    filter_name = "phosphate-filter"
     smart_string = "[#15]" # match phosphorous
-    cfilter = f.CompoundFilter(smart_string)
+    compound_filter = f.CompoundFilter(filter_name, smart_string)
     
     # open the 11-structure file
     # load list with the mols using pybel
