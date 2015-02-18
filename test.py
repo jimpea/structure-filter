@@ -59,6 +59,15 @@ class EvenFilterTest(unittest.TestCase):
 
   def test_CompoundFilter(self):
     fname = "phosphate-filter"
+    smart_string = "[#15]" # match phosphorous
+    cfilter = f.CompoundFilter(smart_string)
+    
+    # open the 11-structure file
+    # load list with the mols using pybel
+    # load a filterchain and process with the file
+    # test for three rejects that contain P
+    # test for 8 structures in the output.
+    
 
 
 if __name__ == '__main__':
