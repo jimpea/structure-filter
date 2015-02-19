@@ -24,3 +24,11 @@ Tests
 -----
 
 Using the built-in python classes
+
+Data
+----
+
+The file 'HeadCmpds_JCP.sdf' contains 11 compounds, two contain
+phosphorous and two contain triflouromethyl groups. We expect
+that only two of these should proof acceptable for further user:
+these are the two triflouromethane containing compounds. 

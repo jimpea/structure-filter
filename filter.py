@@ -2,6 +2,7 @@
 # Jim Pearson
 # 11 February 2015
 
+import pybel as pb
 
 class Filter:
 
@@ -52,4 +53,19 @@ class CompoundFilter:
   def __init__(self, name, smarts):
     self.smarts = smarts
     self.name = name
+  
+  # Divide list into rejects and passed molecules according
+  # to SMARTS string
+  # Returns array as [[rejects], [passed]]
+  def process(self, mol_list):
+    rejects = []
+    passed = []
+    
+    for mol in mol_list:
+      if len(pb.Smarts(self.smarts).findall(mol)) > 0:
+        rejects.append(mol)
+      else:
+        passed.append(mol)
+
+    return [rejects, passed]
 
