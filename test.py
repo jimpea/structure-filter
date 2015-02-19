@@ -1,4 +1,4 @@
-# test.py
+# mbda x: x % 2 == 0test.py
 # Jim Pearson
 # 11 February 2015
 # Unit Tests for the Structure filter
@@ -66,6 +66,9 @@ class EvenFilterTest(unittest.TestCase):
     fChain.add(p_filter)
     molpath = "./data/HeadCmpds_JCP.sdf"
     compound_list = self.molloader(molpath)
+
+    self.assertEqual(filter_name, p_filter.name)
+
     expect = 11
     self.assertEqual(expect, len(compound_list))
     
