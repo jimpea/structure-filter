@@ -20,7 +20,7 @@ Pre-Requisites
 - Python 2.7.3
 - sudo apt-get install python-openbabel
 
-Tests
+Test>s
 -----
 
 Using the built-in python classes
@@ -32,3 +32,16 @@ The file 'HeadCmpds_JCP.sdf' contains 11 compounds, two contain
 phosphorous and two contain triflouromethyl groups. We expect
 that only two of these should proof acceptable for further user:
 these are the two triflouromethane containing compounds. 
+
+Documentation
+-------------
+
+Code comments included using multi-line comments. These can be converted to html files using pydoc:
+    
+    pydoc -w filter # writes documentation for the filer module to html
+
+In addition, use pydoc to start a webserver so that you can read this stuff!
+
+    pydoc -p 1234 # starts an HTTP server on port 1234
+
+

@@ -1,4 +1,4 @@
-# mbda x: x % 2 == 0test.py
+# test.py
 # Jim Pearson
 # 11 February 2015
 # Unit Tests for the Structure filter
@@ -6,6 +6,7 @@
 import pybel as pb
 import filter as f
 import unittest
+import os
 
 class EvenFilterTest(unittest.TestCase):
 
@@ -43,6 +44,8 @@ class EvenFilterTest(unittest.TestCase):
     in_list = [-2, -1, 0, 1, 2, 3, 4]
 
     fChain = f.FilterChain()
+    expected_output_name = "pass-through"
+    self.assertEqual(expected_output_name, fChain.output_name)
     negativeFilter = f.Filter(negname, fnneg)
     evenFilter = f.Filter(ename, fneven)
     fChain.add(negativeFilter)
@@ -52,11 +55,14 @@ class EvenFilterTest(unittest.TestCase):
     self.assertEqual(expect, negativeFilter.process(in_list))
 
     in_list = [-0.54, -2, -1, 0, 1, 2, 3, 4, 5.5, 6.0]
-    expect = {'negative-filter': [-0.54, -2,-1],
-        'even-filter': [0,2,4, 6.0],
-        'pass-through': [1,3, 5.5]}
+    #expect = {'negative-filter': [-0.54, -2,-1],
+    #    'even-filter': [0,2,4, 6.0],
+    #    'pass-through': [1,3, 5.5]}
+    expected_output = {negname: [-0.54, -2,-1],
+        ename: [0,2,4, 6.0],
+        fChain.output_name: [1,3, 5.5]}
 
-    self.assertEqual(expect, fChain.process(in_list))
+    self.assertEqual(expected_output, fChain.process(in_list))
 
   def test_CompoundFilter(self):
     filter_name = "phosphate-filter"
@@ -72,18 +78,18 @@ class EvenFilterTest(unittest.TestCase):
     expect = 11
     self.assertEqual(expect, len(compound_list))
     
-    expect = [filter_name, "pass-through"]
+    expected_lists = [filter_name, fChain.output_name]
 
     results = fChain.process(compound_list)
-    self.assertEqual(expect, results.keys())
+    self.assertEqual(expected_lists, results.keys())
     
     expect=['10279', '10280']
 
     self.assertEqual(expect, self.molcodes(results[filter_name]))
 
-    expect = ['10283','10307', '10309', '10310','10316','10317','10318','10319','10321'] 
+    expected_passed_molcodes = ['10283','10307', '10309', '10310','10316','10317','10318','10319','10321'] 
     
-    self.assertEqual(expect, self.molcodes(results['pass-through']))
+    self.assertEqual(expected_passed_molcodes, self.molcodes(results[fChain.output_name]))
 
   def test_CompoundFilterChain(self):
     p_filter_name  = "phosphorous-filter"
@@ -98,22 +104,24 @@ class EvenFilterTest(unittest.TestCase):
 
     results = filter_chain.process(compound_list)
       
-    expected_keys = sorted([p_filter_name, f_filter_name, "pass-through"])
+    expected_keys = sorted([p_filter_name, f_filter_name, filter_chain.output_name])
     self.assertEqual(expected_keys, sorted(results.keys()))
 
-      
+    fpath = "./results"
+    filter_chain.processToFile(compound_list, fpath)
+    expected_files = [p_filter_name + ".sdf", f_filter_name + ".sdf", filter_chain.output_name + ".sdf"]
+    self.assertEqual(sorted(expected_files), sorted(os.listdir(fpath)))
 
-    # open the 11-structure file
-    # load list with the mols using pybel
-    # load a filterchain and process with the file
-    # test for three rejects that contain P
-    # test for 8 structures in the output.
+  @unittest.skip("skip this file output")
+  def test_nothing(self):
+    self.fail("should not happen")
+
 
   # Helpers
   # ==================
 
   # Load molecules from sdf file
-  # return array of mols
+  # return array of molsp
   def molloader(self, path):
     
     import pybel as pb

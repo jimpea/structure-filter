@@ -65,11 +65,16 @@ class Filter:
 
 class FilterChain:
   ''' Links Filter objects in a chain
-
-       '''
+      
+      The chain attribute is a List of Filters
+      The output_name attribute sets the name
+      for the compounds that pass through all
+      the filters
+  '''
 
   def __init__(self):
     self.chain = []
+    self.output_name = "pass-through"
 
   def add(self, list_filter):
     ''' Add Filter to list
@@ -96,6 +101,31 @@ class FilterChain:
     '''
     return self.processList(input_list)
 
+  def processToFile(self, input_list, file_path):
+    ''' Process the list objects to files
+      
+      Args:
+        input_list: List of compounds
+        fpath: the relative local path for file output, for
+        instance './results'.
+
+      Returns:
+        Writes a file for each selection filter to the path
+        determined by the fpath argument. The filename comes
+        from the Filter name in the chain. The passthough
+        list is named with the output_name attribute
+
+    '''
+    results = self.processList(input_list)
+    file_extension = ".sdf"
+    file_spacer = "/"
+    for key in results:
+      file_name = file_path + file_spacer + key + file_extension
+      mol_file = pb.Outputfile('sdf', file_name, overwrite=True)
+      for mol in results[key]:
+        mol_file.write(mol)
+      mol_file.close()
+
   def processList(self, input_list):
     ''' Passes a list through each Filter object and collects the rejected
       elements, along with the remaining elements into a dictionary.
@@ -119,7 +149,7 @@ class FilterChain:
       process_list = tmp[1]
       outputs[l.name] = tmp[0]
 
-    outputs['pass-through'] = process_list
+    outputs[self.output_name] = process_list
     
 
     return outputs  
