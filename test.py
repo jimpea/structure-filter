@@ -10,8 +10,6 @@ import os
 
 class EvenFilterTest(unittest.TestCase):
 
-  def setUp(self):
-    pass 
 
   def test_filter(self):
 
@@ -64,53 +62,90 @@ class EvenFilterTest(unittest.TestCase):
 
     self.assertEqual(expected_output, fChain.process(in_list))
 
-  def test_CompoundFilter(self):
-    filter_name = "phosphate-filter"
-    smart_string = "[#15]" # match phosphorous
-    p_filter = f.CompoundFilter(filter_name, smart_string)
-    fChain = f.FilterChain()
-    fChain.add(p_filter)
-    molpath = "./data/HeadCmpds_JCP.sdf"
-    compound_list = self.molloader(molpath)
+class CompoundFilterTests(unittest.TestCase):
+  def __init__(self, *args, **kwargs):
+    self.p_filter_name = "phosphorous filter"
+    self.f_filter_name = "fluorine filter"
+    self.fpath = "./results"
+    self.p_filter = f.CompoundFilter(self.p_filter_name, "[#15]")
+    self.f_filter = f.CompoundFilter(self.f_filter_name, "[#9]")
+    self.molpath = "./data/HeadCmpds_JCP.sdf"
+    self.compound_list = self.molloader(self.molpath)
 
-    self.assertEqual(filter_name, p_filter.name)
+    super(CompoundFilterTests, self).__init__(*args, **kwargs)
+    
+  def setUp(self):
+    # answer from http://stackoverflow.com/questions/185936/delete-folder-contents-in-python 
+    #print "set up"
+    folder = "./results/"
+
+    for file in os.listdir(folder):
+      path = os.path.join(folder, file)
+      try:
+        if os.path.isfile(path):
+          os.unlink(path) # same as os.remove(path)
+      except Exception, e:
+        print e
+
+  def tearDown(self):
+    self.setUp()
+    #print "tear down"
+
+  def test_CompoundFilter(self):
+    fChain = f.FilterChain()
+    fChain.add(self.p_filter)
+
+    expect = self.p_filter_name
+    self.assertEqual(expect, self.p_filter.name)
 
     expect = 11
-    self.assertEqual(expect, len(compound_list))
+    self.assertEqual(expect, len(self.compound_list))
     
-    expected_lists = [filter_name, fChain.output_name]
-
-    results = fChain.process(compound_list)
+    expected_lists = [self.p_filter_name, fChain.output_name]
+    results = fChain.process(self.compound_list)
     self.assertEqual(expected_lists, results.keys())
     
     expect=['10279', '10280']
-
-    self.assertEqual(expect, self.molcodes(results[filter_name]))
+    self.assertEqual(expect, self.molcodes(results[self.p_filter_name]))
 
     expected_passed_molcodes = ['10283','10307', '10309', '10310','10316','10317','10318','10319','10321'] 
-    
     self.assertEqual(expected_passed_molcodes, self.molcodes(results[fChain.output_name]))
 
   def test_CompoundFilterChain(self):
-    p_filter_name  = "phosphorous-filter"
-    f_filter_name = "fluoride-filter"
-    p_filter = f.CompoundFilter(p_filter_name, "[#15]")
-    f_filter = f.CompoundFilter(f_filter_name, "[#9]")
     filter_chain = f.FilterChain()
-    filter_chain.add(p_filter)
-    filter_chain.add(f_filter)
-    molpath = "./data/HeadCmpds_JCP.sdf"
-    compound_list = self.molloader(molpath)
+    filter_chain.add(self.p_filter)
+    filter_chain.add(self.f_filter)
+    results = filter_chain.process(self.compound_list)
 
-    results = filter_chain.process(compound_list)
-      
-    expected_keys = sorted([p_filter_name, f_filter_name, filter_chain.output_name])
+    expected_keys = sorted([self.p_filter.name, self.f_filter.name, filter_chain.output_name])
     self.assertEqual(expected_keys, sorted(results.keys()))
 
-    fpath = "./results"
-    filter_chain.processToFile(compound_list, fpath)
-    expected_files = [p_filter_name + ".sdf", f_filter_name + ".sdf", filter_chain.output_name + ".sdf"]
-    self.assertEqual(sorted(expected_files), sorted(os.listdir(fpath)))
+    filter_chain.processToFile(self.compound_list, self.fpath)
+
+    expected_files = [self.p_filter.name + ".sdf", self.f_filter.name + ".sdf", filter_chain.output_name + ".sdf"]
+    self.assertEqual(sorted(expected_files), sorted(os.listdir(self.fpath)))
+
+  def test_MWFilterChain(self):  
+    # add a mw filter to the chain
+    filter_chain = f.FilterChain()
+    max_mw_filter_name = "max-mw"
+    max_mw_filter = f.CompoundMWFilter(max_mw_filter_name, 1000, True)
+    filter_chain.add(max_mw_filter)
+    filter_chain.add(self.p_filter)
+    filter_chain.add(self.f_filter)
+    results = filter_chain.process(self.compound_list)
+
+    # test output of chain
+    expected_keys = sorted([max_mw_filter_name, self.p_filter.name, self.f_filter.name, filter_chain.output_name])
+    self.assertEqual(expected_keys, sorted(results.keys()))
+
+    # test files output by chain
+    # expect only three files in the output as the MW cutoff exceeds the max value in the test file.
+    filter_chain.processToFile(self.compound_list, self.fpath)
+    expected_files = [self.p_filter.name + ".sdf", self.f_filter.name + ".sdf", filter_chain.output_name + ".sdf"]
+    self.assertEqual(sorted(expected_files), sorted(os.listdir(self.fpath)))
+
+
 
   @unittest.skip("skip this file output")
   def test_nothing(self):

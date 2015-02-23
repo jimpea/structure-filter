@@ -122,6 +122,10 @@ class FilterChain:
     for key in results:
       file_name = file_path + file_spacer + key + file_extension
       mol_file = pb.Outputfile('sdf', file_name, overwrite=True)
+
+      if not results[key]:
+          print "List {0} is empty".format(key)
+      #print "List {0}".format(key)
       for mol in results[key]:
         mol_file.write(mol)
       mol_file.close()
@@ -189,6 +193,24 @@ class CompoundFilter:
         rejects.append(mol)
       else:
         passed.append(mol)
+
+    return [rejects, passed]
+
+class CompoundMWFilter:
+
+  def __init__(self, name, limit, upper = True):
+    self.name = name
+    self.limit = limit
+    self.upper = upper
+
+  def process(self, mol_list):
+
+    rejects = []
+    passed = []
+    
+    for mol in mol_list:
+      passed.append(mol)
+
 
     return [rejects, passed]
 
