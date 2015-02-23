@@ -158,7 +158,7 @@ class FilterChain:
 
     return outputs  
 
-class CompoundFilter:
+class SmartFilter:
   """ Separates a list of molecules according to the Smart filter
      
   """
@@ -196,12 +196,12 @@ class CompoundFilter:
 
     return [rejects, passed]
 
-class CompoundMWFilter:
+class MWFilter:
 
-  def __init__(self, name, limit, upper = True):
+  def __init__(self, name, lower_limit, upper_limit):
     self.name = name
-    self.limit = limit
-    self.upper = upper
+    self.lower_limit = lower_limit
+    self.upper_limit = upper_limit
 
   def process(self, mol_list):
 

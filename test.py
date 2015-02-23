@@ -62,21 +62,25 @@ class EvenFilterTest(unittest.TestCase):
 
     self.assertEqual(expected_output, fChain.process(in_list))
 
-class CompoundFilterTests(unittest.TestCase):
+
+class FilterTests(unittest.TestCase):
+
   def __init__(self, *args, **kwargs):
     self.p_filter_name = "phosphorous filter"
     self.f_filter_name = "fluorine filter"
+    self.mw_filter_name = "max-mw"
     self.fpath = "./results"
-    self.p_filter = f.CompoundFilter(self.p_filter_name, "[#15]")
-    self.f_filter = f.CompoundFilter(self.f_filter_name, "[#9]")
+    self.p_filter = f.SmartFilter(self.p_filter_name, "[#15]")
+    self.f_filter = f.SmartFilter(self.f_filter_name, "[#9]")
+    self.mw_filter = f.MWFilter(self.mw_filter_name, 0, 1000)
+
     self.molpath = "./data/HeadCmpds_JCP.sdf"
     self.compound_list = self.molloader(self.molpath)
 
-    super(CompoundFilterTests, self).__init__(*args, **kwargs)
-    
+    super(FilterTests, self).__init__(*args, **kwargs)
+
   def setUp(self):
     # answer from http://stackoverflow.com/questions/185936/delete-folder-contents-in-python 
-    #print "set up"
     folder = "./results/"
 
     for file in os.listdir(folder):
@@ -89,9 +93,39 @@ class CompoundFilterTests(unittest.TestCase):
 
   def tearDown(self):
     self.setUp()
-    #print "tear down"
 
-  def test_CompoundFilter(self):
+  # Helpers
+  # ==================
+
+  # Load molecules from sdf file
+  # return array of molsp
+  def molloader(self, path):
+    
+    import pybel as pb
+    infile = path
+    list = []
+
+    for mol in pb.readfile('sdf', infile):
+      list.append(mol)
+
+    return list
+  
+  # Extract code strings from Molecule array
+  # Return array of code strings
+  def molcodes(self, mols):
+    
+    mlist = []
+
+    for mol in mols:
+      mlist.append(mol.data['Code'])
+
+    return mlist
+
+
+
+class SmartFilterTests(FilterTests):
+
+  def test_SmartFilter(self):
     fChain = f.FilterChain()
     fChain.add(self.p_filter)
 
@@ -125,18 +159,22 @@ class CompoundFilterTests(unittest.TestCase):
     expected_files = [self.p_filter.name + ".sdf", self.f_filter.name + ".sdf", filter_chain.output_name + ".sdf"]
     self.assertEqual(sorted(expected_files), sorted(os.listdir(self.fpath)))
 
+class MWFilterTests(FilterTests):
+
+  def test_MWFilter(self):
+    # Set the mw cut off to 250, should filter off two compounds
+    self.mw_filter.upper_limit = 250
+
   def test_MWFilterChain(self):  
     # add a mw filter to the chain
     filter_chain = f.FilterChain()
-    max_mw_filter_name = "max-mw"
-    max_mw_filter = f.CompoundMWFilter(max_mw_filter_name, 1000, True)
-    filter_chain.add(max_mw_filter)
+    filter_chain.add(self.mw_filter)
     filter_chain.add(self.p_filter)
     filter_chain.add(self.f_filter)
     results = filter_chain.process(self.compound_list)
 
     # test output of chain
-    expected_keys = sorted([max_mw_filter_name, self.p_filter.name, self.f_filter.name, filter_chain.output_name])
+    expected_keys = sorted([self.mw_filter_name, self.p_filter.name, self.f_filter.name, filter_chain.output_name])
     self.assertEqual(expected_keys, sorted(results.keys()))
 
     # test files output by chain
@@ -144,42 +182,6 @@ class CompoundFilterTests(unittest.TestCase):
     filter_chain.processToFile(self.compound_list, self.fpath)
     expected_files = [self.p_filter.name + ".sdf", self.f_filter.name + ".sdf", filter_chain.output_name + ".sdf"]
     self.assertEqual(sorted(expected_files), sorted(os.listdir(self.fpath)))
-
-
-
-  @unittest.skip("skip this file output")
-  def test_nothing(self):
-    self.fail("should not happen")
-
-
-  # Helpers
-  # ==================
-
-  # Load molecules from sdf file
-  # return array of molsp
-  def molloader(self, path):
-    
-    import pybel as pb
-    infile = path
-    list = []
-
-    for mol in pb.readfile('sdf', infile):
-      list.append(mol)
-
-    return list
-  
-  # Extract code strings from Molecule array
-  # Return array of code strings
-  def molcodes(self, mols):
-    
-    mlist = []
-
-    for mol in mols:
-      mlist.append(mol.data['Code'])
-
-    return mlist
-
-
 
 if __name__ == '__main__':
   unittest.main()
