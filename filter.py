@@ -209,8 +209,59 @@ class MWFilter:
     passed = []
     
     for mol in mol_list:
-      passed.append(mol)
+      mw = mol.molwt
+      if (mw > self.lower_limit) and (mw < self.upper_limit):
+        passed.append(mol)
+      else:
+        rejects.append(mol)
 
+    return [rejects, passed]
+
+class HBAFilter:
+
+  def __init__(self, name, lower_limit, upper_limit):
+    self.name = name
+    self.lower_limit = lower_limit
+    self.upper_limit = upper_limit
+
+  def process(self, mol_list):
+    rejects = []
+    passed = []
+
+    hba_smarts =  pb.Smarts("[$([$([#8,#16]);!$(*=N~O);" + "!$(*~N=O);X1,X2]),$([#7;v3;" + "!$([nH]);!$(*(-a)-a)])]")
+
+
+    for mol in mol_list:
+      hba_count  = len(hba_smarts.findall(mol))
+
+      if (hba_count < self.upper_limit) and (hba_count > self.lower_limit):
+        passed.append(mol)
+      else:
+        rejects.append(mol)
+    return[rejects, passed]
+
+class HBDFilter:
+  """ I do not understand this test. The SMARTS filter 
+  given by baoilleach.blogspot.co.uk seems quite broad
+
+  """
+  def __init__(self, name, lower_limit, upper_limit):
+    self.name = name
+    self.lower_limit = lower_limit
+    self.upper_limit = upper_limit
+
+  def process(self, mol_list):
+    rejects = []
+    passed = []
+
+    hbd_smarts =  pb.Smarts("[!#6;!H0]")
+    
+    for mol in mol_list:
+      hbd_count = len(hbd_smarts.findall(mol))
+      if (hbd_count < self.upper_limit) and (hbd_count > self.lower_limit):
+        passed.append(mol)
+      else:
+        rejects.append(mol)
 
     return [rejects, passed]
 

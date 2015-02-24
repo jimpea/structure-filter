@@ -64,7 +64,8 @@ class EvenFilterTest(unittest.TestCase):
 
 
 class FilterTests(unittest.TestCase):
-
+  """ Setup common objects and helper functions
+  """
   def __init__(self, *args, **kwargs):
     self.p_filter_name = "phosphorous filter"
     self.f_filter_name = "fluorine filter"
@@ -164,6 +165,14 @@ class MWFilterTests(FilterTests):
   def test_MWFilter(self):
     # Set the mw cut off to 250, should filter off two compounds
     self.mw_filter.upper_limit = 250
+    filter_chain = f.FilterChain()
+    filter_chain.add(self.mw_filter)
+    expected_lists = sorted([self.mw_filter_name, filter_chain.output_name])
+    results = filter_chain.process(self.compound_list)
+    self.assertEqual(expected_lists, sorted(results.keys()))
+
+    expected = ['10279', '10280']
+    self.assertEqual(expected, self.molcodes(results[self.mw_filter_name]))
 
   def test_MWFilterChain(self):  
     # add a mw filter to the chain
@@ -182,6 +191,31 @@ class MWFilterTests(FilterTests):
     filter_chain.processToFile(self.compound_list, self.fpath)
     expected_files = [self.p_filter.name + ".sdf", self.f_filter.name + ".sdf", filter_chain.output_name + ".sdf"]
     self.assertEqual(sorted(expected_files), sorted(os.listdir(self.fpath)))
+
+class HBAFilterTests(FilterTests):
+
+  def test_HBAFilter(self):
+    hba_filter_name = "hba-filter"
+    hba_filter = f.HBAFilter(hba_filter_name, 0, 10)
+    filter_chain = f.FilterChain()
+    filter_chain.add(hba_filter)
+    results = filter_chain.process(self.compound_list)
+
+    expected = ['10279','10280']
+    self.assertEqual(expected,self.molcodes(results[hba_filter_name]))
+
+class HBDFilterTests(FilterTests):
+
+  def test_HBDFilter(self):
+
+    hbd_filter_name  = "hbd-filter"
+    hbd_filter = f.HBDFilter(hbd_filter_name, 0, 5)
+    filter_chain = f.FilterChain()
+    filter_chain.add(hbd_filter)
+    results = filter_chain.process(self.compound_list)
+
+    expected = ["10279", "10280"]
+    self.assertEqual(expected, self.molcodes(results[hbd_filter_name]))
 
 if __name__ == '__main__':
   unittest.main()

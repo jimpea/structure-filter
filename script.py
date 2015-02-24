@@ -36,9 +36,11 @@ filters = {
 
 
 filter_chain = f.FilterChain()
+filter_chain.add(f.MWFilter("mw-filter", 45, 250))
+filter_chain.add(f.HBAFilter("hba-filter", 0, 10))
 
 for k, v in filters.items():
-  filter = f.CompoundFilter(k,v)
+  filter = f.SmartFilter(k,v)
   filter_chain.add(filter)
 
 molpath = "./data/AllCmpds_HTM.sdf"
