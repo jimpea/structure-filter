@@ -6,44 +6,43 @@
 # This takes the list of compounds  and passes them through a 
 # series of filters. The compounds filtered out at each stage 
 # are collected onto separate sd files in the results folder.
+# 
+# smarts strings loaded from the file 'smarts.json'. The python 
+# json module loads this as a unicode string which raises
+# errors in pybel. Accordingly these are all encoded into utf8
+# before addition to the SmartFilter.
 
 import pybel as pb
 import filter as f
 import os
+import json
 
-filters = {
-  "phosphorous": "[#9]",
-  "fluorine": "[#15]",
-  "hydrazine": "[NX3][NX3]",
-  "acetylene": "[$([CX2]#C)]",
-  "isocyanate": "[CX1-]#[NX2+]",
-  "nitrile": "[NX1]#[CX2]",
-  "peroxide": "[OX2,OX1-][OX2,OX1-]",
-  "halide": "[Cl,Br,I]",
-  "acylhalides":"[CX3](=[OX1])[F,Cl,Br,I]",
-  "acidanhydride": "[CX3](=[OX1])[OX2][CX3](=[OX1])",
-  "arylfluorides": "[FX1][c]",
-  "cyanogroup": "[C]#[N]"}
+json_data_file = "smarts-test.json"
 
+separator = "---------------------------\n"
 
-
+filtersj = json.load(open(json_data_file))
   #"amides": "[NC(=O)]",
   #hba = pb.Smarts("[$([$([#8,#16]);!$(*=N~O);" + "!$(*~N=O);X1,X2]),$([#7;v3;" + "!$([nH]);!$(*(-a)-a)])]")
   #hbd = pb.Smarts("[!#6;!H0]")
+  
+print filtersj
 
-
-
-
+print separator
 
 filter_chain = f.FilterChain()
 filter_chain.add(f.MWFilter("mw-filter", 45, 250))
 filter_chain.add(f.HBAFilter("hba-filter", 0, 10))
 
-for k, v in filters.items():
-  filter = f.SmartFilter(k,v)
+for name, smarts in filtersj.iteritems():
+  print "name: {0}, smarts: {1}".format(name, smarts)
+  filter = f.SmartFilter(name.encode('utf8'), smarts.encode('utf8'))
   filter_chain.add(filter)
 
-molpath = "./data/AllCmpds_HTM.sdf"
+print separator
+
+#molpath = "./data/AllCmpds_HTM.sdf"
+molpath = "./data/HeadCmpds_JCP.sdf"
 
 compound_list = []
 
@@ -54,8 +53,11 @@ file_path = "./results"
 
 filter_chain.processToFile(compound_list, file_path)
 
+
+
 def print_hello():
   print "Hello World!"
 
 if __name__ == '__main__':
+
   print_hello()
