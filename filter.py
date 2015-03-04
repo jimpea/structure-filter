@@ -194,6 +194,10 @@ class SmartFilter:
       else:
         passed.append(mol)
 
+    print "smarts: {0}".format(self.smarts)
+    print "rejects: {0}".format(len(rejects))
+    print "passed: {0}".format(len(passed))
+    print "-------------------------------"
     return [rejects, passed]
 
 class MWFilter:

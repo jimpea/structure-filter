@@ -41,8 +41,8 @@ for name, smarts in filtersj.iteritems():
 
 print separator
 
-#molpath = "./data/AllCmpds_HTM.sdf"
-molpath = "./data/HeadCmpds_JCP.sdf"
+molpath = "./data/AllCmpds_HTM.sdf"
+#molpath = "./data/HeadCmpds_JCP.sdf"
 
 compound_list = []
 

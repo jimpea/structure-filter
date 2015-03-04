@@ -1,0 +1,17 @@
+{
+  "phosphorous": "[#15]",
+  "fluorine": "[#9]",
+  "hydrazine": "[NX3][NX3]",
+  "acetylene": "[$([CX2]#C)]",
+  "isocyanate": "[CX1-]#[NX2+]",
+  "nitrile": "[NX1]#[CX2]",
+  "peroxide": "[OX2,OX1-][OX2,OX1-]",
+  "halide": "[Cl,Br,I]",
+  "acylhalides":"[CX3](=[OX1])[F,Cl,Br,I]",
+  "acidanhydride": "[CX3](=[OX1])[OX2][CX3](=[OX1])",
+  "arylfluorides": "[FX1][c]",
+  "cyanogroup": "[C]#[N]",
+  "selenium" : "[#79]"
+  "not_B_Al_Si_P_S_Ga_Ge_As_Se_Br_I": "[#5,#13,#14,#15,#16,#31,#32,#33,#34,#35,#53]"
+}
+
